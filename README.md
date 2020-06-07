@@ -5,12 +5,12 @@
 Create a virtual environment
 ```shell 
 
-python -m venv env
+python -m venv venv
 ```
 Activate virtual environment
 ```shell
 
-venv\Script\activate
+venv\Scripts\activate
 ```
 Install required
 ```shell
