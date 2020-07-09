@@ -1,5 +1,9 @@
+'''
+    Projet : Maxime Mohandi  / Charles-Edouard Selenou / Sylvain Viegas
+'''
 import tensorflow as tf
 from tensorflow import keras
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -13,8 +17,34 @@ x_test = x_test.reshape(10000,28,28,1)
 y_train = tf.keras.utils.to_categorical(y_train, 10)
 y_test = tf.keras.utils.to_categorical(y_test, 10)
 
+x_train = x_train.astype('float32')
+
+y_train = keras.utils.to_categorical(y_train, 10)
+y_test  = keras.utils.to_categorical(y_test, 10)
+
+shift = 0.2
+datagen = ImageDataGenerator(width_shift_range=shift, height_shift_range=shift)
+datagen.fit(x_train)
+
+batch_size = 60000
+X_train = []
+Y_train = []
+for x_bach, y_bach in datagen.flow(x_train, y_train, batch_size=(batch_size)):
+    for i in range(batch_size): 
+        X_train.append(x_bach[i].reshape(28,28))
+        Y_train.append(y_bach[i])
+    break
+
+X_train = np.array(X_train).reshape(batch_size, 784) 
+
+x_train = x_train.reshape(60000, 784)
+
+x_train = np.concatenate((x_train, X_train))
+y_train = np.concatenate((y_train, Y_train))
+
 # C1: description de la couche de convolution
 MonReseau = tf.keras.Sequential()
+
 MonReseau.add(tf.keras.layers.Conv2D(
     filters=6,             # 6 noyaux de convolutions (6 feature maps)
     kernel_size=(5,5),     # noyau de convolution 5x5
@@ -80,7 +110,7 @@ hist=MonReseau.fit(
     x=x_train, # données d'entrée pour l'apprentissage
     y=y_train, # sorties désirées associées aux données d'entrée
     epochs=11, # nombre de cycles d'apprentissage 
-    batch_size=128, # taille des lots pour l'apprentissage
+    batch_size=784, # taille des lots pour l'apprentissage
     validation_data=(x_test,y_test) # données de test
 ) 
 #------------------------------------------------------------# 
