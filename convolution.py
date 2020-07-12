@@ -16,13 +16,12 @@ x_test = x_test.reshape(10000,28,28,1)
 
 y_train = tf.keras.utils.to_categorical(y_train, 10)
 y_test = tf.keras.utils.to_categorical(y_test, 10)
+shift = 0.2
 
 x_train = x_train.astype('float32')
 
-y_train = keras.utils.to_categorical(y_train, 10)
-y_test  = keras.utils.to_categorical(y_test, 10)
+#Double la taille des données
 
-shift = 0.2
 datagen = ImageDataGenerator(width_shift_range=shift, height_shift_range=shift)
 datagen.fit(x_train)
 
@@ -31,13 +30,9 @@ X_train = []
 Y_train = []
 for x_bach, y_bach in datagen.flow(x_train, y_train, batch_size=(batch_size)):
     for i in range(batch_size): 
-        X_train.append(x_bach[i].reshape(28,28))
+        X_train.append(x_bach[i])
         Y_train.append(y_bach[i])
     break
-
-X_train = np.array(X_train).reshape(batch_size, 784) 
-
-x_train = x_train.reshape(60000, 784)
 
 x_train = np.concatenate((x_train, X_train))
 y_train = np.concatenate((y_train, Y_train))
@@ -53,6 +48,8 @@ MonReseau.add(tf.keras.layers.Conv2D(
     input_shape=(28,28,1), # taille des entrées (car c'est la 1ère couche)
     padding='same'         #ajout d'un bord à l'image pour éviter la # réduction de taille (nb de pixels calculé# à partir de la taille du noyau)
 ))
+
+
 
 # S2: description de la couche de pooling (average)
 
@@ -78,8 +75,10 @@ MonReseau.add(tf.keras.layers.AveragePooling2D(
     padding='valid'        # pas d'ajout de bord à l'image 
 ))      
 
+MonReseau.add(tf.keras.layers.GaussianNoise(1001))
+
 # C5: connexion totale entre les pixels et la 1ère couche de 120 neurones
-# Mise à plat des 16x(5x5)=400 pixels des images de convolution
+# Mise à plat des 16x(5x5)=400 pixels des images de convolutionSS
 MonReseau.add(tf.keras.layers.Flatten())
 
 # Création d'un couche de 120 neurones avec fonction d'activation Tanh
@@ -113,6 +112,7 @@ hist=MonReseau.fit(
     batch_size=784, # taille des lots pour l'apprentissage
     validation_data=(x_test,y_test) # données de test
 ) 
+
 #------------------------------------------------------------# 
 #Affichage des graphiques d'évolutions de l'apprentissage
 # ------------------------------------------------------------# 
